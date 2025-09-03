@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMap - מפת הטיולים החיה</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        #map {
+            width: 100%;
+            height: calc(100vh - 120px);
+        }
+        
+        .story-popup {
+            max-width: 300px;
+            direction: rtl;
+        }
+        
+        .story-popup h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .story-popup .user {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .story-popup .time {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .story-popup .description {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .story-popup .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .story-popup button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .like-btn {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .like-btn:hover {
+            background: #ff5252;
+            transform: translateY(-1px);
+        }
+        
+        .share-btn {
+            background: #74b9ff;
+            color: white;
+        }
+        
+        .share-btn:hover {
+            background: #0984e3;
+            transform: translateY(-1px);
+        }
+        
+        .pulse-marker {
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            border: 3px solid white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗺️ OMap - מפת הטיולים החיה</h1>
+        <p>גלה חוויות טיול אמיתיות ממטיילים ברחבי העולם</p>
+    </div>
+    
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // יצירת המפה
+        const map = L.map('map').setView([31.7683, 35.2137], 6); // ישראל במרכז
+        
+        // הוספת שכבת מפה
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // נתוני סטוריז עם קואורדינטות אמיתיות
+        const stories = [
+            {
+                id: 1,
+                lat: 41.9028,
+                lng: 12.4964,
+                title: "הפיצה הכי טובה ברומא! 🍕",
+                user: "דני מתל אביב",
+                time: "לפני שעתיים",
+                description: "מצאתי פיצריה נסתרת ברובע טרסטוורה. הבצק פריך מבחוץ ורך מבפנים, והמוצרלה נמסה בפה!",
+                likes: 15
+            },
+            {
+                id: 2,
+                lat: 48.8566,
+                lng: 2.3522,
+                title: "שקיעה מדהימה באיפל 🌅",
+                user: "שרה מחיפה",
+                time: "לפני יום",
+                description: "הגעתי לטרוקדרו בשעה 18:30 וחיכיתי לשקיעה. הנוף הכי רומנטי בעולם!",
+                likes: 23
+            },
+            {
+                id: 3,
+                lat: 35.6762,
+                lng: 139.6503,
+                title: "קפה מושלם בטוקיו ☕",
+                user: "עמית מרמת גן",
+                time: "לפני 3 שעות", 
+                description: "בית קפה קטן בשיבויה שמכין קפה בשיטה יפנית מסורתית. הטעם הכי עמוק ששתיתי!",
+                likes: 8
+            },
+            {
+                id: 4,
+                lat: 32.0853,
+                lng: 34.7818,
+                title: "חומוס בלוד 🧆",
+                user: "מיכל מירושלים",
+                time: "לפני 5 שעות",
+                description: "חומוס אבו מרוואן בלוד - הכי טעים במרכז הארץ! שווה את הנסיעה",
+                likes: 31
+            },
+            {
+                id: 5,
+                lat: 25.2048,
+                lng: 55.2708,
+                title: "קניות בדובאי 🛍️",
+                user: "רון מהרצליה",
+                time: "לפני יום",
+                description: "דובאי מול מתחת לברג׳ ח׳ליפה. המזרקות בערב פשוט מרהיבות!",
+                likes: 12
+            }
+        ];
+        
+        // פונקציה ליצירת HTML של פופאפ
+        function createPopupContent(story) {
+            return `
+                <div class="story-popup">
+                    <h3>${story.title}</h3>
+                    <div class="user">👤 ${story.user}</div>
+                    <div class="time">🕐 ${story.time}</div>
+                    <div class="description">${story.description}</div>
+                    <div class="actions">
+                        <button class="like-btn" onclick="likeStory(${story.id})">❤️ ${story.likes}</button>
+                        <button class="share-btn" onclick="shareStory(${story.id})">📤 שתף</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // הוספת הסטוריז למפה
+        stories.forEach((story, index) => {
+            setTimeout(() => {
+                // יצירת אייקון מותאם אישית
+                const customIcon = L.divIcon({
+                    className: 'pulse-marker',
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 13]
+                });
+                
+                // יצירת המרקר
+                const marker = L.marker([story.lat, story.lng], {
+                    icon: customIcon
+                }).addTo(map);
+                
+                // הוספת פופאפ
+                marker.bindPopup(createPopupContent(story));
+                
+                console.log(`✅ הוספתי סטורי: ${story.title}`);
+            }, index * 300);
+        });
+        
+        // פונקציות לאינטראקציה
+        window.likeStory = function(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story) {
+                story.likes += 1;
+                alert(`תודה על הלייק! 👍 עכשיו יש ${story.likes} לייקים`);
+            }
+        };
+        
+        window.shareStory = function(storyId) {
+            const story = stories.find(s => s.id === storyId);
+            if (story) {
+                const url = `${window.location.href}#story-${storyId}`;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('הקישור הועתק! 📎 שתף עם חברים');
+                }).catch(() => {
+                    alert(`שתף את הסטורי: ${story.title}`);
+                });
+            }
+        };
+        
+        console.log('🗺️ OMap נטענה בהצלחה! רואה ' + stories.length + ' סטוריז על המפה');
+    </script>
+</body>
+</html>
