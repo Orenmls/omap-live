@@ -206,7 +206,7 @@
                 title: "קניות בדובאי 🛍️",
                 user: "רון מהרצליה",
                 time: "לפני יום",
-                description: "דובאי מול מתחת לברג' ח'ליפה. המזרקות בערב פשוט מרהיבות! וגם השופינג אדיר - המלל הכי גדול בעולם.",
+                description: "דובאי מול מתחת לברג' ח'ליפה. המזרקות בערב פשוט מרהיבות! וגם השופינג אדיר - המול הכי גדול בעולם.",
                 likes: 12,
                 color: '#e17055'
             },
@@ -226,7 +226,8 @@
         let map;
         let markers = [];
 
-        function initMap() {
+        // שנה את שם הפונקציה ל-initCommunityMap כדי שיתאים ל-callback
+        function initCommunityMap() {
             // הסר את הלודר
             document.querySelector('.loader').style.display = 'none';
             
@@ -355,18 +356,9 @@
         }
 
         console.log('🗺️ OMap: מתחיל לטעון Google Maps...');
-        <script>
-    // הגדר את הפונקציה לפני טעינת Google Maps
-    function initCommunityMap() {
-        const map = new google.maps.Map(document.getElementById("map"), {
-            center: { lat: 32.0853, lng: 34.7818 },
-            zoom: 12
-        });
-    }
-</script>
     </script>
     
     <!-- טעינת Google Maps API עם המפתח שלך -->
-           <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAs9px1FfdOIrsKo3YV1KuHwFq3Rm9KBVo&callback=initCommunityMap"></script>
- </body>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAs9px1FfdOIrsKo3YV1KuHwFq3Rm9KBVo&callback=initCommunityMap"></script>
+</body>
 </html>
