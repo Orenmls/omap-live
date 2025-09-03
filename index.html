@@ -248,6 +248,8 @@
 
             // הוספת הסטוריז למפה
             addStoriesToMap();
+            
+            console.log('🗺️ OMap: המפה נטענה בהצלחה עם ' + stories.length + ' סטוריז!');
         }
 
         function addStoriesToMap() {
@@ -352,31 +354,12 @@
             }
         }
 
-        // טעינת Google Maps API עם המפתח
-        function loadGoogleMaps() {
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAs9px1FfdOIrsKo3YV1KuHwFq3Rm9KBVo=initMap`;
-            script.async = true;
-            script.defer = true;
-            document.head.appendChild(script);
-        }
-
-        // התחלת הטעינה
         console.log('🗺️ OMap: מתחיל לטעון Google Maps...');
-        
-        // אם אין מפתח API, השתמש במפה דמה
-        if (!window.google) {
-            setTimeout(() => {
-                document.querySelector('.loader').innerHTML = `
-                    <h3>📋 הדרכה להפעלת המפה:</h3>
-                    <p style="margin: 10px 0;">1. קבל מפתח API של Google Maps (חינם עד 200$ בחודש)</p>
-                    <p style="margin: 10px 0;">2. החלף "YOUR_API_KEY" בקוד עם המפתח שלך</p>
-                    <p style="margin: 10px 0;">3. העלה לGitHub Pages</p>
-                    <br>
-                    <p><strong>לעכשיו: ${stories.length} סטוריז מוכנים למפה!</strong></p>
-                `;
-            }, 2000);
-        }
+    </script>
+    
+    <!-- טעינת Google Maps API עם המפתח שלך -->
+    <script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAs9px1FfdOIrsKo3YV1KuHwFq3Rm9KBVo&callback=initMap">
     </script>
 </body>
 </html>
