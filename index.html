@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMap - מפת הטיולים החיה</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * {
             margin: 0;
@@ -41,91 +40,102 @@
         }
         
         .story-popup {
-            max-width: 300px;
+            max-width: 320px;
             direction: rtl;
+            font-family: Arial, sans-serif;
         }
         
         .story-popup h3 {
             color: #667eea;
             margin-bottom: 10px;
             font-size: 16px;
+            font-weight: bold;
         }
         
         .story-popup .user {
             color: #666;
             font-size: 14px;
             margin-bottom: 5px;
+            font-weight: 500;
         }
         
         .story-popup .time {
             color: #999;
             font-size: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         
         .story-popup .description {
-            background: #f8f9fa;
-            padding: 10px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 14px;
-            line-height: 1.4;
+            line-height: 1.5;
+            border-right: 3px solid #667eea;
         }
         
         .story-popup .actions {
             display: flex;
             gap: 8px;
+            justify-content: center;
         }
         
         .story-popup button {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 500;
             transition: all 0.2s ease;
+            min-width: 80px;
         }
         
         .like-btn {
-            background: #ff6b6b;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
             color: white;
         }
         
         .like-btn:hover {
-            background: #ff5252;
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #ff5252, #ff7979);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
         }
         
         .share-btn {
-            background: #74b9ff;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
             color: white;
         }
         
         .share-btn:hover {
-            background: #0984e3;
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, #0984e3, #2d3436);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(116, 185, 255, 0.3);
         }
         
-        .pulse-marker {
-            width: 20px;
-            height: 20px;
-            background: #ff6b6b;
-            border: 3px solid white;
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
-            animation: pulse 2s infinite;
-            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
         }
         
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
-            }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -135,19 +145,15 @@
         <p>גלה חוויות טיול אמיתיות ממטיילים ברחבי העולם</p>
     </div>
     
-    <div id="map"></div>
+    <div id="map">
+        <div class="loader">
+            <div class="spinner"></div>
+            <p>טוען מפה...</p>
+        </div>
+    </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // יצירת המפה
-        const map = L.map('map').setView([31.7683, 35.2137], 6); // ישראל במרכז
-        
-        // הוספת שכבת מפה
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        
-        // נתוני סטוריז עם קואורדינטות אמיתיות
+        // נתוני הסטוריז עם קואורדינטות אמיתיות
         const stories = [
             {
                 id: 1,
@@ -156,8 +162,9 @@
                 title: "הפיצה הכי טובה ברומא! 🍕",
                 user: "דני מתל אביב",
                 time: "לפני שעתיים",
-                description: "מצאתי פיצריה נסתרת ברובע טרסטוורה. הבצק פריך מבחוץ ורך מבפנים, והמוצרלה נמסה בפה!",
-                likes: 15
+                description: "מצאתי פיצריה נסתרת ברובע טרסטוורה. הבצק פריך מבחוץ ורך מבפנים, והמוצרלה נמסה בפה! המקום נקרא 'Da Enzo al 29' - חובה לנסות!",
+                likes: 15,
+                color: '#ff6b6b'
             },
             {
                 id: 2,
@@ -166,8 +173,9 @@
                 title: "שקיעה מדהימה באיפל 🌅",
                 user: "שרה מחיפה",
                 time: "לפני יום",
-                description: "הגעתי לטרוקדרו בשעה 18:30 וחיכיתי לשקיעה. הנוף הכי רומנטי בעולם!",
-                likes: 23
+                description: "הגעתי לטרוקדרו בשעה 18:30 וחיכיתי לשקיעה. הנוף הכי רומנטי בעולם! טיפ: בואו עם כיסא קטן וקצת יין.",
+                likes: 23,
+                color: '#74b9ff'
             },
             {
                 id: 3,
@@ -175,9 +183,10 @@
                 lng: 139.6503,
                 title: "קפה מושלם בטוקיו ☕",
                 user: "עמית מרמת גן",
-                time: "לפני 3 שעות", 
-                description: "בית קפה קטן בשיבויה שמכין קפה בשיטה יפנית מסורתית. הטעם הכי עמוק ששתיתי!",
-                likes: 8
+                time: "לפני 3 שעות",
+                description: "בית קפה קטן בשיבויה שמכין קפה בשיטה יפנית מסורתית. הטעם הכי עמוק ששתיתי! השם: Blue Bottle Coffee.",
+                likes: 8,
+                color: '#00b894'
             },
             {
                 id: 4,
@@ -186,8 +195,9 @@
                 title: "חומוס בלוד 🧆",
                 user: "מיכל מירושלים",
                 time: "לפני 5 שעות",
-                description: "חומוס אבו מרוואן בלוד - הכי טעים במרכז הארץ! שווה את הנסיעה",
-                likes: 31
+                description: "חומוס אבו מרוואן בלוד - הכי טעים במרכז הארץ! שווה את הנסיעה. פתוח עד 14:00, כדאי להגיע מוקדם.",
+                likes: 31,
+                color: '#fdcb6e'
             },
             {
                 id: 5,
@@ -196,12 +206,100 @@
                 title: "קניות בדובאי 🛍️",
                 user: "רון מהרצליה",
                 time: "לפני יום",
-                description: "דובאי מול מתחת לברג׳ ח׳ליפה. המזרקות בערב פשוט מרהיבות!",
-                likes: 12
+                description: "דובאי מול מתחת לברג' ח'ליפה. המזרקות בערב פשוט מרהיבות! וגם השופינג אדיר - המלל הכי גדול בעולם.",
+                likes: 12,
+                color: '#e17055'
+            },
+            {
+                id: 6,
+                lat: 32.7767,
+                lng: 35.0231,
+                title: "ים כנרת בשקיעה 🌊",
+                user: "יונתן מתל אביב",
+                time: "לפני 4 שעות",
+                description: "חוף דוגנית - המקום הכי שקט בכנרת. אין אף אחד, רק אתה והטבע. מושלם לפיקניק רומנטי.",
+                likes: 7,
+                color: '#00cec9'
             }
         ];
-        
-        // פונקציה ליצירת HTML של פופאפ
+
+        let map;
+        let markers = [];
+
+        function initMap() {
+            // הסר את הלודר
+            document.querySelector('.loader').style.display = 'none';
+            
+            // יצירת המפה ממורכזת על ישראל
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 6,
+                center: { lat: 31.7683, lng: 35.2137 }, // ישראל
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels.text",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ],
+                mapTypeControl: true,
+                streetViewControl: false,
+                fullscreenControl: true
+            });
+
+            // הוספת הסטוריז למפה
+            addStoriesToMap();
+        }
+
+        function addStoriesToMap() {
+            stories.forEach((story, index) => {
+                setTimeout(() => {
+                    createStoryMarker(story);
+                }, index * 200);
+            });
+        }
+
+        function createStoryMarker(story) {
+            // יצירת אייקון מותאם אישית
+            const markerIcon = {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 12,
+                fillColor: story.color,
+                fillOpacity: 0.8,
+                strokeColor: '#ffffff',
+                strokeWeight: 3
+            };
+
+            // יצירת המרקר
+            const marker = new google.maps.Marker({
+                position: { lat: story.lat, lng: story.lng },
+                map: map,
+                title: story.title,
+                icon: markerIcon,
+                animation: google.maps.Animation.DROP
+            });
+
+            // יצירת תוכן הפופאפ
+            const popupContent = createPopupContent(story);
+            
+            const infoWindow = new google.maps.InfoWindow({
+                content: popupContent,
+                maxWidth: 350
+            });
+
+            // לחיצה על המרקר
+            marker.addListener('click', () => {
+                // סגור חלונות פתוחים אחרים
+                markers.forEach(m => m.infoWindow.close());
+                infoWindow.open(map, marker);
+            });
+
+            // שמירת הקשר בין המרקר לחלון
+            marker.infoWindow = infoWindow;
+            markers.push(marker);
+
+            console.log(`✅ הוספתי סטורי: ${story.title}`);
+        }
+
         function createPopupContent(story) {
             return `
                 <div class="story-popup">
@@ -216,51 +314,69 @@
                 </div>
             `;
         }
-        
-        // הוספת הסטוריז למפה
-        stories.forEach((story, index) => {
-            setTimeout(() => {
-                // יצירת אייקון מותאם אישית
-                const customIcon = L.divIcon({
-                    className: 'pulse-marker',
-                    iconSize: [26, 26],
-                    iconAnchor: [13, 13]
-                });
-                
-                // יצירת המרקר
-                const marker = L.marker([story.lat, story.lng], {
-                    icon: customIcon
-                }).addTo(map);
-                
-                // הוספת פופאפ
-                marker.bindPopup(createPopupContent(story));
-                
-                console.log(`✅ הוספתי סטורי: ${story.title}`);
-            }, index * 300);
-        });
-        
+
         // פונקציות לאינטראקציה
-        window.likeStory = function(storyId) {
+        function likeStory(storyId) {
             const story = stories.find(s => s.id === storyId);
             if (story) {
                 story.likes += 1;
+                
+                // עדכן את הפופאפ
+                const marker = markers.find(m => m.getTitle() === story.title);
+                if (marker && marker.infoWindow) {
+                    marker.infoWindow.setContent(createPopupContent(story));
+                }
+                
                 alert(`תודה על הלייק! 👍 עכשיו יש ${story.likes} לייקים`);
             }
-        };
-        
-        window.shareStory = function(storyId) {
+        }
+
+        function shareStory(storyId) {
             const story = stories.find(s => s.id === storyId);
             if (story) {
-                const url = `${window.location.href}#story-${storyId}`;
-                navigator.clipboard.writeText(url).then(() => {
-                    alert('הקישור הועתק! 📎 שתף עם חברים');
-                }).catch(() => {
+                const text = `${story.title} - ${story.description}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: story.title,
+                        text: text,
+                        url: window.location.href
+                    });
+                } else if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('הסטורי הועתק! 📎 שתף עם חברים');
+                    });
+                } else {
                     alert(`שתף את הסטורי: ${story.title}`);
-                });
+                }
             }
-        };
+        }
+
+        // טעינת Google Maps API עם המפתח
+        function loadGoogleMaps() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAs9px1FfdOIrsKo3YV1KuHwFq3Rm9KBVo=initMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+
+        // התחלת הטעינה
+        console.log('🗺️ OMap: מתחיל לטעון Google Maps...');
         
-        console.log('🗺️ OMap נטענה בהצלחה! רואה ' + stories.length + ' סטוריז על המפה');
+        // אם אין מפתח API, השתמש במפה דמה
+        if (!window.google) {
+            setTimeout(() => {
+                document.querySelector('.loader').innerHTML = `
+                    <h3>📋 הדרכה להפעלת המפה:</h3>
+                    <p style="margin: 10px 0;">1. קבל מפתח API של Google Maps (חינם עד 200$ בחודש)</p>
+                    <p style="margin: 10px 0;">2. החלף "YOUR_API_KEY" בקוד עם המפתח שלך</p>
+                    <p style="margin: 10px 0;">3. העלה לGitHub Pages</p>
+                    <br>
+                    <p><strong>לעכשיו: ${stories.length} סטוריז מוכנים למפה!</strong></p>
+                `;
+            }, 2000);
+        }
     </script>
 </body>
 </html>
