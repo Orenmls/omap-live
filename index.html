@@ -355,6 +355,15 @@
         }
 
         console.log('🗺️ OMap: מתחיל לטעון Google Maps...');
+        <script>
+    // הגדר את הפונקציה לפני טעינת Google Maps
+    function initCommunityMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 32.0853, lng: 34.7818 },
+            zoom: 12
+        });
+    }
+</script>
     </script>
     
     <!-- טעינת Google Maps API עם המפתח שלך -->
